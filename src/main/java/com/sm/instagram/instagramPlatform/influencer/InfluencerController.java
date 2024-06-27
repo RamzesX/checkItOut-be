@@ -6,6 +6,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -13,6 +17,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasRole;
 
 @RestController
 @CrossOrigin
@@ -47,8 +53,13 @@ public class InfluencerController {
         return influencerDtoPage;
     }
 
+    @Secured("SCOPE_RAEAD")
     @GetMapping(value = "/list", produces = "application/json")
     public @ResponseBody List<InfluencerDto> getInfluencerList() throws ItemNotFoundException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentPrincipalName = authentication.getName();
+        authentication.getAuthorities();
+
         List<Influencer> influencerList = influencerService.fetchCustomerDataAsList();
         List<InfluencerDto> influencerDtoList = influencerList.stream().map(e -> modelMapper.map(e, InfluencerDto.class)).toList();
         return influencerDtoList;
